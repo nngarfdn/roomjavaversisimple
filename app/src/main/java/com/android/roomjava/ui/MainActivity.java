@@ -1,25 +1,17 @@
 package com.android.roomjava.ui;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.LiveData;
-
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
-
+import androidx.appcompat.app.AppCompatActivity;
 import com.android.roomjava.R;
 import com.android.roomjava.database.Note;
 import com.android.roomjava.database.NoteDao;
 import com.android.roomjava.database.NoteRoomDatabase;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -29,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     private ExecutorService executorService;
     private ListView listView;
     private EditText edtTitle, edtDesc, edtDate;
+    private Note selectedNote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,16 +39,15 @@ public class MainActivity extends AppCompatActivity {
         NoteRoomDatabase db = NoteRoomDatabase.getDatabase(this);
         mNotesDao = db.noteDao();
 
-
         getAllNotes();
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Note item = (Note) adapterView.getAdapter().getItem(i);
-                edtTitle.setText(item.getTitle());
-                edtDesc.setText(item.getDescription());
-                edtDate.setText(item.getDate());
+                selectedNote = (Note) adapterView.getAdapter().getItem(i);
+                edtTitle.setText(selectedNote.getTitle());
+                edtDesc.setText(selectedNote.getDescription());
+                edtDate.setText(selectedNote.getDate());
             }
         });
 
@@ -81,9 +73,10 @@ public class MainActivity extends AppCompatActivity {
         btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                update(new Note(edtTitle.getText().toString(),
-                        edtDesc.getText().toString(),
-                        edtDate.getText().toString()));
+                selectedNote.setTitle(edtTitle.getText().toString());
+                selectedNote.setDescription(edtDesc.getText().toString());
+                selectedNote.setDate(edtDate.getText().toString());
+                update(selectedNote);
                 setEmptyField();
             }
         });
